@@ -48,15 +48,16 @@ body {
 
 .fog {
   position: fixed;
-  inset: -20%;
+  inset: -10%;
   z-index: 1;
   pointer-events: none;
   background:
     radial-gradient(40% 30% at 20% 30%, rgba(120, 60, 200, 0.18), transparent 70%),
     radial-gradient(35% 25% at 80% 60%, rgba(255, 122, 24, 0.12), transparent 70%),
     radial-gradient(50% 40% at 50% 100%, rgba(109, 40, 217, 0.22), transparent 70%);
-  filter: blur(30px);
-  animation: fogDrift 26s ease-in-out infinite alternate;
+  filter: blur(20px);
+  will-change: transform;
+  animation: fogDrift 30s ease-in-out infinite alternate;
 }
 
 .vignette {
@@ -69,10 +70,10 @@ body {
 
 @keyframes fogDrift {
   from {
-    transform: translate3d(-3%, -2%, 0) scale(1.05);
+    transform: translate3d(-3%, -2%, 0);
   }
   to {
-    transform: translate3d(4%, 3%, 0) scale(1.15);
+    transform: translate3d(4%, 3%, 0);
   }
 }
 
@@ -86,8 +87,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 18px clamp(14px, 4vw, 40px);
-  background: linear-gradient(180deg, rgba(10, 5, 20, 0.85), rgba(10, 5, 20, 0));
-  backdrop-filter: blur(6px);
+  background: linear-gradient(180deg, rgba(10, 5, 20, 0.94), rgba(10, 5, 20, 0));
 }
 
 .hud__brand {
@@ -325,6 +325,7 @@ body {
   padding: 0;
   z-index: 6;
   outline: none;
+  --halo: rgba(255, 176, 32, 0.55);
   animation: floaty 6s ease-in-out infinite;
   transition:
     transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -333,13 +334,28 @@ body {
     background 0.3s ease;
 }
 
+/* Glow halo. Animating transform/opacity stays on the compositor,
+   unlike the old animated box-shadow which repainted every frame. */
+.node::before {
+  content: "";
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--halo), transparent 68%);
+  opacity: 0;
+  transform: scale(0.8);
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
 @keyframes floaty {
   0%,
   100% {
-    margin-top: 0;
+    translate: 0 0;
   }
   50% {
-    margin-top: -8px;
+    translate: 0 -8px;
   }
 }
 
@@ -392,9 +408,23 @@ body {
     0 0 0 3px rgba(255, 176, 32, 0.12),
     0 0 26px rgba(255, 122, 24, 0.55),
     inset 0 0 18px rgba(255, 176, 32, 0.25);
-  animation:
-    floaty 6s ease-in-out infinite,
-    readyPulse 2s ease-in-out infinite;
+}
+
+.node--ready::before {
+  opacity: 1;
+  animation: haloPulse 2s ease-in-out infinite;
+}
+
+@keyframes haloPulse {
+  0%,
+  100% {
+    transform: scale(0.82);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
 }
 
 .node--ready .node__icon {
@@ -414,22 +444,6 @@ body {
     inset 0 0 22px rgba(255, 176, 32, 0.4);
 }
 
-@keyframes readyPulse {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 3px rgba(255, 176, 32, 0.12),
-      0 0 22px rgba(255, 122, 24, 0.45),
-      inset 0 0 16px rgba(255, 176, 32, 0.2);
-  }
-  50% {
-    box-shadow:
-      0 0 0 6px rgba(255, 176, 32, 0.18),
-      0 0 40px rgba(255, 122, 24, 0.85),
-      inset 0 0 24px rgba(255, 176, 32, 0.45);
-  }
-}
-
 /* unlocked */
 .node--unlocked {
   border-color: var(--purple);
@@ -443,6 +457,11 @@ body {
     inset 0 0 20px rgba(168, 85, 247, 0.35);
 }
 
+.node--unlocked::before {
+  opacity: 0.5;
+  --halo: rgba(168, 85, 247, 0.5);
+}
+
 .node--unlocked .node__icon {
   filter: grayscale(0) brightness(1.15) drop-shadow(0 0 8px rgba(255, 176, 32, 0.7));
 }
@@ -452,25 +471,21 @@ body {
 }
 
 /* master / legendary */
+.node--master {
+  --halo: rgba(255, 211, 77, 0.8);
+}
+
 .node--master.node--unlocked {
   border-color: var(--gold);
   box-shadow:
     0 0 30px rgba(255, 211, 77, 0.75),
     0 0 70px rgba(255, 122, 24, 0.55),
     inset 0 0 26px rgba(255, 211, 77, 0.4);
-  animation:
-    floaty 6s ease-in-out infinite,
-    legendary 3s ease-in-out infinite;
 }
 
-@keyframes legendary {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 6px rgba(255, 211, 77, 0.6));
-  }
-  50% {
-    filter: drop-shadow(0 0 20px rgba(255, 211, 77, 0.95));
-  }
+.node--master.node--unlocked::before {
+  opacity: 1;
+  animation: haloPulse 2.4s ease-in-out infinite;
 }
 
 .node--shake {
@@ -642,6 +657,215 @@ body {
   height: 8px;
   border-radius: 50%;
   will-change: transform, opacity;
+}
+
+/* ---------- Unlock ring + floating reward text ---------- */
+.unlock-ring {
+  position: fixed;
+  z-index: 51;
+  width: 90px;
+  height: 90px;
+  margin: -45px 0 0 -45px;
+  border-radius: 50%;
+  border: 3px solid var(--orange-hot);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.unlock-ring--alt {
+  border-color: var(--purple);
+}
+
+.float-reward {
+  position: fixed;
+  z-index: 52;
+  transform: translate(-50%, -50%);
+  font-weight: 800;
+  font-size: 1rem;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow:
+    0 0 10px rgba(0, 0, 0, 0.9),
+    0 0 16px currentColor;
+  will-change: transform, opacity;
+}
+
+.float-reward--xp {
+  color: var(--toxic);
+}
+
+.float-reward--points {
+  color: var(--orange-hot);
+}
+
+/* ---------- Level up overlay ---------- */
+.levelup {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: none;
+  place-items: center;
+  pointer-events: none;
+}
+
+.levelup.show {
+  display: grid;
+  animation: luFlash 2.6s ease-out both;
+}
+
+@keyframes luFlash {
+  0% {
+    background: radial-gradient(circle, rgba(255, 176, 32, 0.55), rgba(10, 5, 20, 0.1) 60%, transparent 75%);
+  }
+  22% {
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.28), rgba(10, 5, 20, 0.35) 60%, transparent 80%);
+  }
+  100% {
+    background: radial-gradient(circle, transparent, transparent);
+  }
+}
+
+.levelup__rays {
+  position: absolute;
+  width: 150vmax;
+  height: 150vmax;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 176, 32, 0) 0deg,
+    rgba(255, 176, 32, 0.22) 8deg,
+    rgba(255, 176, 32, 0) 16deg,
+    rgba(168, 85, 247, 0) 24deg,
+    rgba(168, 85, 247, 0.2) 32deg,
+    rgba(168, 85, 247, 0) 40deg
+  );
+  background-size: 100% 100%;
+  -webkit-mask: radial-gradient(circle, rgba(0, 0, 0, 0.9) 12%, transparent 62%);
+  mask: radial-gradient(circle, rgba(0, 0, 0, 0.9) 12%, transparent 62%);
+  opacity: 0;
+}
+
+.levelup.show .levelup__rays {
+  animation: luRays 3.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes luRays {
+  0% {
+    transform: rotate(-40deg) scale(0.3);
+    opacity: 0;
+  }
+  30% {
+    transform: rotate(20deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(160deg) scale(1.15);
+    opacity: 0;
+  }
+}
+
+.levelup__ring {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 4px solid var(--gold);
+  opacity: 0;
+}
+
+.levelup__ring--2 {
+  border-color: var(--purple);
+}
+
+.levelup.show .levelup__ring {
+  animation: luRing 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.levelup.show .levelup__ring--2 {
+  animation-delay: 0.16s;
+}
+
+@keyframes luRing {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+    box-shadow: 0 0 0 0 rgba(255, 211, 77, 0.8);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3.6);
+    opacity: 0;
+    box-shadow: 0 0 60px 24px rgba(255, 211, 77, 0);
+  }
+}
+
+.levelup__card {
+  position: relative;
+  text-align: center;
+  padding: 10px 26px;
+  transform: scale(0.6);
+  opacity: 0;
+}
+
+.levelup.show .levelup__card {
+  animation: luCard 2.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes luCard {
+  0% {
+    transform: scale(0.55) translateY(24px);
+    opacity: 0;
+  }
+  16% {
+    transform: scale(1.12) translateY(0);
+    opacity: 1;
+  }
+  26% {
+    transform: scale(1);
+  }
+  80% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.04) translateY(-16px);
+    opacity: 0;
+  }
+}
+
+.levelup__eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--toxic);
+  text-shadow: 0 0 14px rgba(125, 255, 107, 0.8);
+  margin-bottom: 4px;
+}
+
+.levelup__title {
+  font-family: "Creepster", cursive;
+  font-weight: 400;
+  font-size: clamp(3rem, 12vw, 7rem);
+  line-height: 0.95;
+  color: #ffe6b0;
+  letter-spacing: 4px;
+  text-shadow:
+    0 0 12px rgba(255, 176, 32, 0.95),
+    0 0 34px rgba(255, 122, 24, 0.7),
+    0 0 70px rgba(255, 45, 85, 0.5);
+}
+
+.levelup__reward {
+  margin-top: 10px;
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 99px;
+  font-weight: 800;
+  font-size: clamp(0.8rem, 2.6vw, 1.05rem);
+  color: #1a0b00;
+  background: linear-gradient(180deg, var(--gold), var(--orange));
+  box-shadow: 0 0 26px rgba(255, 176, 32, 0.8);
 }
 
 /* ---------- Footer ---------- */

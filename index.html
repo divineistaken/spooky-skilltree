@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#0a0612" />
     <meta
       name="description"
-      content="The Pumpkin Codex — a spooky animated JavaScript skill tree."
+      content="The Warlord's Codex — a haunted, animated territorial.io conquest skill tree."
     />
-    <title>🎃 The Pumpkin Codex — Haunted Skill Tree</title>
+    <title>🎃 The Warlord's Codex — Haunted territorial.io Skill Tree</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -30,8 +30,8 @@
       <div class="hud__brand">
         <span class="pumpkin">🎃</span>
         <div>
-          <h1 class="hud__title">The Pumpkin Codex</h1>
-          <p class="hud__sub" id="subtitle">A haunted skill tree</p>
+          <h1 class="hud__title">The Warlord's Codex</h1>
+          <p class="hud__sub" id="subtitle">A haunted territorial.io skill tree</p>
         </div>
       </div>
 
@@ -77,6 +77,17 @@
 
     <div id="toast" class="toast" aria-live="polite"></div>
     <div id="burst" class="burst" aria-hidden="true"></div>
+
+    <div id="levelup" class="levelup" aria-hidden="true">
+      <div class="levelup__rays"></div>
+      <div class="levelup__ring"></div>
+      <div class="levelup__ring levelup__ring--2"></div>
+      <div class="levelup__card">
+        <div class="levelup__eyebrow">The graveyard trembles</div>
+        <div class="levelup__title">LEVEL <span id="luLevel">2</span></div>
+        <div class="levelup__reward">🎃 REWARD · +<span id="luPoints">5</span> SKILL POINTS</div>
+      </div>
+    </div>
 
     <script type="module" src="./js/app.js"></script>
   </body>

@@ -1,17 +1,19 @@
-# 🎃 The Pumpkin Codex
+# 🎃 The Warlord's Codex
 
-A **haunted, animated skill tree** for a JavaScript project — built with plain
+A **haunted, animated skill tree for territorial.io** — built with plain
 HTML, CSS and vanilla JS (ES modules). No build step, no dependencies.
 
 ![theme](https://img.shields.io/badge/theme-Halloween-ff7a18) ![made with](https://img.shields.io/badge/made%20with-vanilla%20JS-f7df1e)
 
 ## ✨ Features
 
-- 🕸️ **Interactive skill tree** — unlock nodes by spending skill points, gated by prerequisites.
+- 🕸️ **Interactive skill tree** — unlock conquest skills by spending points, gated by prerequisites.
+- 🗺️ **territorial.io themed** — Land Grab, Blood Tithe, Ghost Fleet, Dread Fleet, Curse Bombs… all the way to **Territorial Overlord**.
 - 🎃 **Halloween theme** — glowing embers, drifting fog, twinkling stars and flapping bats on a live `<canvas>`.
-- ⚡ **Working animations** — floating nodes, pulsing "ready" states, animated connection flows, unlock bursts, screen shake on denied unlocks.
+- ⚡ **Smooth, working animations** — GPU-friendly floating nodes, pulsing halos, animated connection flows, unlock rings, burst particles and floating reward text.
+- 🔥 **Holy level-up sequence** — rotating god-rays, expanding rings and a giant **LEVEL n** burst with its own fanfare.
 - 🔊 **Spooky sound effects** generated with the Web Audio API (mute toggle included).
-- 📈 **XP + leveling** — every unlock grants XP; leveling up refunds more skill points.
+- 📈 **XP + leveling** — every unlock grants XP; level-ups pay out skill points.
 - 💾 **Auto-save** to `localStorage`, plus a Reset button.
 - 📱 **Responsive** and honors `prefers-reduced-motion`.
 
@@ -39,8 +41,8 @@ Pushing to `main` triggers the GitHub Actions workflow in
 
 1. Start with **10 skill points**.
 2. Unlock nodes whose prerequisites are met by clicking them.
-3. Earn XP → level up → gain more points.
-4. Reach the **Pumpkin King** 🎃 to beat the tree.
+3. Earn XP → level up → gain **+5 skill points** each level.
+4. Reach the **Territorial Overlord** 👑 to beat the tree.
 5. Click **Reset** to respec.
 
 ## 🗂️ Structure

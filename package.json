@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "The Pumpkin Codex — a haunted animated JavaScript skill tree.",
+  "description": "The Warlord's Codex — a haunted, animated territorial.io conquest skill tree.",
   "scripts": {
     "start": "npx --yes serve .",
     "check": "node --check js/data.js && node --check js/audio.js && node --check js/background.js && node --check js/app.js"

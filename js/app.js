@@ -20,6 +20,9 @@ const el = {
   soundBtn: document.getElementById("soundBtn"),
   subtitle: document.getElementById("subtitle"),
   stage: document.getElementById("stage"),
+  levelup: document.getElementById("levelup"),
+  luLevel: document.getElementById("luLevel"),
+  luPoints: document.getElementById("luPoints"),
 };
 
 const nodeEls = new Map();
@@ -158,6 +161,10 @@ function update() {
 }
 
 /* ---------------- interactions ---------------- */
+function readyCount() {
+  return TREE.nodes.filter(canUnlock).length;
+}
+
 function attemptUnlock(n) {
   if (isUnlocked(n.id)) {
     toast(`${n.icon} ${n.name} is already awakened`);
@@ -168,43 +175,62 @@ function attemptUnlock(n) {
     return;
   }
   if (state.points < n.cost) {
-    deny(n, `⚠️ Need ${n.cost - state.points} more skill point(s)`);
+    const short = n.cost - state.points;
+    deny(n, `⚠️ Need ${short} more skill point${short > 1 ? "s" : ""}`);
     return;
   }
 
+  const readyBefore = readyCount();
+
   state.points -= n.cost;
   state.unlocked.push(n.id);
-  state.xp += n.cost * TREE.xpPerCost;
+  const xpGain = n.cost * TREE.xpPerCost;
+  state.xp += xpGain;
 
   const node = nodeEls.get(n.id);
   node.classList.add("node--pop");
   setTimeout(() => node.classList.remove("node--pop"), 520);
 
+  const rect = node.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
   burstAt(node);
+  ringAt(cx, cy, false);
+  floatText(cx, cy, `+${xpGain} XP`, "float-reward--xp");
   sfx.unlock();
-  toast(`${n.icon} ${n.name} awakened!`);
 
-  let leveled = false;
+  let levelsGained = 0;
   while (state.xp >= xpNeeded(state.level)) {
     state.xp -= xpNeeded(state.level);
     state.level += 1;
     state.points += TREE.pointsPerLevel;
-    leveled = true;
-  }
-  if (leveled) {
-    sfx.level();
-    pulse(el.points);
-    toast(`⬆️ Level ${state.level}! +${TREE.pointsPerLevel} skill points`);
+    levelsGained += 1;
   }
 
-  if (n.id === "master") {
+  update();
+
+  const newReady = Math.max(0, readyCount() - (readyBefore - 1));
+
+  if (levelsGained > 0) {
+    const pointsGained = levelsGained * TREE.pointsPerLevel;
+    pulse(el.points);
+    setTimeout(() => sfx.levelUp(), 170);
+    showLevelUp(state.level, pointsGained);
+    floatText(cx, cy - 26, `+${pointsGained} SP`, "float-reward--points");
+    toast(`⬆️ LEVEL ${state.level} · +${pointsGained} skill points`);
+  } else {
+    let msg = `${n.icon} ${n.name} awakened · +${xpGain} XP`;
+    if (newReady > 0) msg += ` · ⚡ ${newReady} new skill${newReady > 1 ? "s" : ""}`;
+    toast(msg);
+  }
+
+  if (n.id === "overlord") {
     sfx.master();
     celebrate();
-    toast("🎃 THE PUMPKIN KING RISES. All bugs bow before you.");
+    setTimeout(() => toast("🎃 TERRITORIAL OVERLORD. The whole map is yours."), 900);
   }
 
   save();
-  update();
 }
 
 function deny(n, msg) {
@@ -308,7 +334,57 @@ function burstAt(nodeEl) {
   const cx = r.left + r.width / 2;
   const cy = r.top + r.height / 2;
   const hue = 18 + Math.random() * 30;
-  for (let i = 0; i < 22; i++) spark(cx, cy, hue);
+  for (let i = 0; i < 20; i++) spark(cx, cy, hue);
+}
+
+function ringAt(x, y, alt) {
+  const ring = document.createElement("span");
+  ring.className = "unlock-ring" + (alt ? " unlock-ring--alt" : "");
+  ring.style.left = x + "px";
+  ring.style.top = y + "px";
+  el.burst.appendChild(ring);
+  const anim = ring.animate(
+    [
+      { transform: "scale(0.2)", opacity: 0.95 },
+      { transform: "scale(2.6)", opacity: 0 },
+    ],
+    { duration: 680, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }
+  );
+  anim.onfinish = () => ring.remove();
+}
+
+function floatText(x, y, text, cls) {
+  const span = document.createElement("span");
+  span.className = "float-reward " + cls;
+  span.textContent = text;
+  span.style.left = x + "px";
+  span.style.top = y + "px";
+  el.burst.appendChild(span);
+  const anim = span.animate(
+    [
+      { transform: "translate(-50%, -50%) scale(0.7)", opacity: 0 },
+      { transform: "translate(-50%, -120%) scale(1.15)", opacity: 1, offset: 0.25 },
+      { transform: "translate(-50%, -240%) scale(1)", opacity: 0 },
+    ],
+    { duration: 1150, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
+  );
+  anim.onfinish = () => span.remove();
+}
+
+/* ---------------- level up overlay ---------------- */
+let levelupTimer = null;
+function showLevelUp(level, points) {
+  el.luLevel.textContent = level;
+  el.luPoints.textContent = points;
+  el.levelup.classList.remove("show");
+  void el.levelup.offsetWidth; // force reflow to restart the animation
+  el.levelup.classList.add("show");
+  el.levelup.setAttribute("aria-hidden", "false");
+  clearTimeout(levelupTimer);
+  levelupTimer = setTimeout(() => {
+    el.levelup.classList.remove("show");
+    el.levelup.setAttribute("aria-hidden", "true");
+  }, 2700);
 }
 
 function celebrate() {
@@ -344,6 +420,15 @@ el.soundBtn.addEventListener("click", () => {
 });
 
 /* ---------------- boot ---------------- */
+let lineRaf = 0;
+function scheduleLines() {
+  if (lineRaf) return;
+  lineRaf = requestAnimationFrame(() => {
+    lineRaf = 0;
+    drawLines();
+  });
+}
+
 function init() {
   initBackground();
   buildNodes();
@@ -352,11 +437,10 @@ function init() {
   update();
   requestAnimationFrame(drawLines);
 
-  const ro = new ResizeObserver(() => drawLines());
+  const ro = new ResizeObserver(scheduleLines);
   ro.observe(el.stage);
-  window.addEventListener("resize", drawLines);
-  window.addEventListener("scroll", drawLines, { passive: true });
-  document.fonts?.ready.then(drawLines);
+  window.addEventListener("resize", scheduleLines);
+  document.fonts?.ready.then(scheduleLines);
 }
 
 init();

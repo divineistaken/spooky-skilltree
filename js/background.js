@@ -1,21 +1,40 @@
-const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
 export function initBackground() {
   const canvas = document.getElementById("bg");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   let w = 0;
   let h = 0;
   let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let running = true;
+
+  // Pre-rendered glow sprites (one per hue bucket) — avoids creating a
+  // radial gradient for every ember on every frame, which was the main CPU cost.
+  const SPRITE = 64;
+  const sprites = [22, 28, 34, 40, 46, 52].map((hue) => {
+    const c = document.createElement("canvas");
+    c.width = c.height = SPRITE;
+    const g = c.getContext("2d");
+    const grd = g.createRadialGradient(SPRITE / 2, SPRITE / 2, 0, SPRITE / 2, SPRITE / 2, SPRITE / 2);
+    grd.addColorStop(0, `hsla(${hue}, 100%, 68%, 0.95)`);
+    grd.addColorStop(0.35, `hsla(${hue}, 100%, 56%, 0.5)`);
+    grd.addColorStop(1, `hsla(${hue}, 100%, 50%, 0)`);
+    g.fillStyle = grd;
+    g.fillRect(0, 0, SPRITE, SPRITE);
+    return c;
+  });
 
   const stars = [];
   const embers = [];
   const bats = [];
   let t = 0;
+  let batTimer = 2;
 
   function resize() {
     w = canvas.clientWidth;
     h = canvas.clientHeight;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -25,31 +44,30 @@ export function initBackground() {
   function seed() {
     stars.length = 0;
     embers.length = 0;
-    const starCount = Math.round((w * h) / 14000);
+    bats.length = 0;
+    const starCount = Math.min(180, Math.round((w * h) / 20000));
     for (let i = 0; i < starCount; i++) {
       stars.push({
         x: Math.random() * w,
-        y: Math.random() * h * 0.9,
-        r: Math.random() * 1.3 + 0.3,
+        y: Math.random() * h * 0.92,
+        r: Math.random() * 1.4 + 0.4,
         p: Math.random() * Math.PI * 2,
         s: Math.random() * 0.02 + 0.006,
       });
     }
-    const emberCount = Math.round((w * h) / 26000);
-    for (let i = 0; i < emberCount; i++) {
-      embers.push(newEmber(true));
-    }
+    const emberCount = Math.min(70, Math.round((w * h) / 34000));
+    for (let i = 0; i < emberCount; i++) embers.push(newEmber(true));
   }
 
   function newEmber(anywhere) {
     return {
       x: Math.random() * w,
-      y: anywhere ? Math.random() * h : h + 12,
-      r: Math.random() * 2.2 + 0.8,
-      vy: -(Math.random() * 0.5 + 0.18),
-      vx: (Math.random() - 0.5) * 0.28,
+      y: anywhere ? Math.random() * h : h + 14,
+      r: Math.random() * 2.4 + 1,
+      vy: -(Math.random() * 0.45 + 0.16),
+      vx: (Math.random() - 0.5) * 0.26,
       p: Math.random() * Math.PI * 2,
-      hue: 20 + Math.random() * 28,
+      si: (Math.random() * sprites.length) | 0,
       life: 0,
       max: Math.random() * 320 + 220,
     };
@@ -67,47 +85,41 @@ export function initBackground() {
     });
   }
 
-  let batTimer = 0;
-
   function draw(dt) {
     t += dt;
     ctx.clearRect(0, 0, w, h);
+    ctx.globalAlpha = 1;
 
-    // twinkling stars
+    // twinkling stars (fillRect is cheaper than arc)
+    ctx.fillStyle = "#ffe9c9";
     for (const s of stars) {
       const a = 0.35 + Math.sin(t * s.s * 60 + s.p) * 0.35;
-      ctx.globalAlpha = Math.max(0.05, a);
-      ctx.fillStyle = "#ffe9c9";
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.globalAlpha = a < 0.06 ? 0.06 : a;
+      const d = s.r * 2;
+      ctx.fillRect(s.x - s.r, s.y - s.r, d, d);
     }
 
-    // rising embers
+    // rising embers — fast sprite blit, no per-frame gradient allocation
     for (const e of embers) {
       e.life += dt * 60;
       e.y += e.vy;
       e.x += e.vx + Math.sin(t * 2 + e.p) * 0.15;
       const fade = Math.min(1, e.life / 60) * Math.max(0, 1 - e.life / e.max);
-      ctx.globalAlpha = Math.max(0, fade) * 0.9;
-      const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.r * 4);
-      g.addColorStop(0, `hsla(${e.hue}, 100%, 62%, 0.95)`);
-      g.addColorStop(1, `hsla(${e.hue}, 100%, 50%, 0)`);
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(e.x, e.y, e.r * 4, 0, Math.PI * 2);
-      ctx.fill();
-      if (e.y < -20 || e.life > e.max) {
+      if (fade <= 0.01 || e.y < -30 || e.life > e.max) {
         Object.assign(e, newEmber(false));
+        continue;
       }
+      const size = e.r * 9;
+      ctx.globalAlpha = fade * 0.9;
+      ctx.drawImage(sprites[e.si], e.x - size / 2, e.y - size / 2, size, size);
     }
 
     // bats
-    if (!prefersReduced) {
+    if (!reduced) {
       batTimer -= dt;
       if (batTimer <= 0) {
         spawnBat();
-        batTimer = 5 + Math.random() * 7;
+        batTimer = 6 + Math.random() * 8;
       }
     }
     for (let i = bats.length - 1; i >= 0; i--) {
@@ -137,13 +149,39 @@ export function initBackground() {
 
   let last = performance.now();
   function loop(now) {
+    if (!running) return;
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     draw(dt);
     requestAnimationFrame(loop);
   }
 
-  window.addEventListener("resize", resize);
+  // Stop burning CPU while the tab is hidden.
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      running = false;
+    } else {
+      running = true;
+      last = performance.now();
+      requestAnimationFrame(loop);
+    }
+  });
+
+  let rzRaf = 0;
+  const onResize = () => {
+    if (rzRaf) return;
+    rzRaf = requestAnimationFrame(() => {
+      rzRaf = 0;
+      resize();
+      if (reduced) draw(0);
+    });
+  };
+
+  window.addEventListener("resize", onResize);
   resize();
-  requestAnimationFrame(loop);
+  if (reduced) {
+    draw(0);
+  } else {
+    requestAnimationFrame(loop);
+  }
 }
