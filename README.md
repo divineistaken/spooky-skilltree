@@ -1,18 +1,19 @@
-# 🎃 The Warlord's Codex
+# 🕷️ The Widow's Web
 
 A **haunted, animated skill tree for territorial.io** — built with plain
 HTML, CSS and vanilla JS (ES modules). No build step, no dependencies.
 
-![theme](https://img.shields.io/badge/theme-Halloween-ff7a18) ![made with](https://img.shields.io/badge/made%20with-vanilla%20JS-f7df1e)
+![theme](https://img.shields.io/badge/theme-Halloween-8b5cf6) ![made with](https://img.shields.io/badge/made%20with-vanilla%20JS-f7df1e)
 
 ## ✨ Features
 
 - 🕸️ **Interactive skill tree** — unlock conquest skills by spending points, gated by prerequisites.
 - 🗺️ **territorial.io themed** — Land Grab, Blood Tithe, Ghost Fleet, Dread Fleet, Curse Bombs… all the way to **Territorial Overlord**.
-- 🎃 **Halloween theme** — glowing embers, drifting fog, twinkling stars and flapping bats on a live `<canvas>`.
+- 🕷️ **Crawling spiders** — spiders wander the whole screen and **scurry away when you touch or move near them**; corner cobwebs sway in the corner of your eye.
+- 🎃 **Halloween atmosphere** — glowing embers, drifting fog, twinkling stars and flapping bats on a live `<canvas>`.
 - ⚡ **Smooth, working animations** — GPU-friendly floating nodes, pulsing halos, animated connection flows, unlock rings, burst particles and floating reward text.
-- 🔥 **Holy level-up sequence** — rotating god-rays, expanding rings and a giant **LEVEL n** burst with its own fanfare.
-- 🔊 **Spooky sound effects** generated with the Web Audio API (mute toggle included).
+- 🔥 **Holy level-up sequence** — rotating god-rays, expanding rings and a giant **LEVEL n** burst with an ominous swell.
+- 🔊 **Atmospheric sound** — reverb-drenched drones, tolling bells and dusty impacts via the Web Audio API (no cartoon beeps).
 - 📈 **XP + leveling** — every unlock grants XP; level-ups pay out skill points.
 - 💾 **Auto-save** to `localStorage`, plus a Reset button.
 - 📱 **Responsive** and honors `prefers-reduced-motion`.
@@ -54,6 +55,7 @@ Pushing to `main` triggers the GitHub Actions workflow in
 │   ├── app.js         # state, rendering, interactions
 │   ├── data.js        # the skill tree definition (edit me!)
 │   ├── background.js  # canvas embers / fog / bats
+│   ├── spiders.js     # cobwebs + interactive crawling spiders
 │   └── audio.js       # Web Audio sound effects
 └── .github/workflows/deploy.yml
 ```

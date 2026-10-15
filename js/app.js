@@ -1,8 +1,9 @@
 import { TREE, EDGES } from "./data.js";
 import { sfx } from "./audio.js";
 import { initBackground } from "./background.js";
+import { initSpiders } from "./spiders.js";
 
-const SAVE_KEY = "pumpkin-codex-v1";
+const SAVE_KEY = "widows-web-v1";
 const SVGNS = "http://www.w3.org/2000/svg";
 
 const el = {
@@ -227,7 +228,7 @@ function attemptUnlock(n) {
   if (n.id === "overlord") {
     sfx.master();
     celebrate();
-    setTimeout(() => toast("🎃 TERRITORIAL OVERLORD. The whole map is yours."), 900);
+    setTimeout(() => toast("🕷️ TERRITORIAL OVERLORD. The whole map is caught in your web."), 900);
   }
 
   save();
@@ -431,6 +432,7 @@ function scheduleLines() {
 
 function init() {
   initBackground();
+  initSpiders();
   buildNodes();
   buildDefs();
   buildLines();

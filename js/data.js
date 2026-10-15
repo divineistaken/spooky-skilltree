@@ -1,5 +1,5 @@
 export const TREE = {
-  title: "The Warlord's Codex",
+  title: "The Widow's Web",
   subtitle: "A haunted territorial.io skill tree",
   startPoints: 10,
   levelBase: 100,
