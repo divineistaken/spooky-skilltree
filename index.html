@@ -69,9 +69,31 @@
 
     <div id="tooltip" class="tooltip" role="tooltip" aria-hidden="true"></div>
 
+    <div id="detail" class="detail" aria-hidden="true">
+      <div class="detail__backdrop" data-close></div>
+      <div
+        class="detail__card"
+        id="detailCard"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="detailName"
+      >
+        <button class="detail__close" type="button" data-close aria-label="Close details">
+          ✕
+        </button>
+        <div class="detail__icon" id="detailIcon">🌍</div>
+        <div class="detail__tier" id="detailTier">Tier 0</div>
+        <h2 class="detail__name" id="detailName">Skill</h2>
+        <p class="detail__desc" id="detailDesc"></p>
+        <div class="detail__meta" id="detailMeta"></div>
+        <div class="detail__reqs" id="detailReqs"></div>
+        <button class="detail__claim" id="detailClaim" type="button">Claim</button>
+      </div>
+    </div>
+
     <footer class="foot">
       <span
-        >Hover a node to read its curse · Click to unlock · Progress saves
+        >Click a node for details · Claim it from the panel · Progress saves
         automatically</span
       >
       <span class="foot__ghost">🕸️</span>

@@ -7,7 +7,8 @@ HTML, CSS and vanilla JS (ES modules). No build step, no dependencies.
 
 ## ✨ Features
 
-- 🕸️ **Interactive skill tree** — unlock conquest skills by spending points, gated by prerequisites.
+- 🕸️ **Interactive skill tree** — click any node to open a **details panel** (name, tier, cost, what it needs) and **Claim** it from there.
+- 🏷️ **Every skill is labelled** — its name sits right under its icon on the tree.
 - 🗺️ **territorial.io themed** — Land Grab, Blood Tithe, Ghost Fleet, Dread Fleet, Curse Bombs… all the way to **Territorial Overlord**.
 - 🕷️ **Crawling spiders** — spiders wander the whole screen and **scurry away when you touch or move near them**; corner cobwebs sway in the corner of your eye.
 - 🎃 **Halloween atmosphere** — glowing embers, drifting fog, twinkling stars and flapping bats on a live `<canvas>`.

@@ -24,6 +24,15 @@ const el = {
   levelup: document.getElementById("levelup"),
   luLevel: document.getElementById("luLevel"),
   luPoints: document.getElementById("luPoints"),
+  detail: document.getElementById("detail"),
+  detailCard: document.getElementById("detailCard"),
+  detailIcon: document.getElementById("detailIcon"),
+  detailTier: document.getElementById("detailTier"),
+  detailName: document.getElementById("detailName"),
+  detailDesc: document.getElementById("detailDesc"),
+  detailMeta: document.getElementById("detailMeta"),
+  detailReqs: document.getElementById("detailReqs"),
+  detailClaim: document.getElementById("detailClaim"),
 };
 
 const nodeEls = new Map();
@@ -83,9 +92,9 @@ function buildNodes() {
     btn.style.top = n.y + "%";
     btn.style.animationDelay = (Math.random() * 4).toFixed(2) + "s";
     btn.setAttribute("aria-label", `${n.name} (cost ${n.cost})`);
-    btn.innerHTML = `<span class="node__icon">${n.icon}</span><span class="node__cost">${n.cost}</span>`;
+    btn.innerHTML = `<span class="node__icon">${n.icon}</span><span class="node__cost">${n.cost}</span><span class="node__name">${n.name}</span>`;
 
-    btn.addEventListener("click", () => attemptUnlock(n));
+    btn.addEventListener("click", () => openDetail(n));
     btn.addEventListener("mouseenter", () => {
       if (!("ontouchstart" in window)) sfx.hover();
       showTooltip(n, btn);
@@ -159,6 +168,8 @@ function update() {
   el.xpText.textContent = `${Math.floor(state.xp)} / ${xpNeeded(state.level)}`;
   el.xpFill.style.width = Math.min(100, (state.xp / xpNeeded(state.level)) * 100) + "%";
   el.unlockedCount.textContent = `${state.unlocked.length} / ${TREE.nodes.length}`;
+
+  if (detailId) renderDetail();
 }
 
 /* ---------------- interactions ---------------- */
@@ -286,6 +297,102 @@ function hideTooltip() {
   el.tooltip.classList.remove("show");
   el.tooltip.setAttribute("aria-hidden", "true");
 }
+
+/* ---------------- detail panel ---------------- */
+let detailId = null;
+
+function openDetail(n) {
+  hideTooltip();
+  detailId = n.id;
+  renderDetail();
+  el.detail.classList.add("show");
+  el.detail.setAttribute("aria-hidden", "false");
+  sfx.hover();
+  (el.detailClaim.disabled ? el.detail.querySelector(".detail__close") : el.detailClaim).focus();
+}
+
+function closeDetail() {
+  if (!detailId) return;
+  const prev = nodeEls.get(detailId);
+  detailId = null;
+  el.detail.classList.remove("show");
+  el.detail.setAttribute("aria-hidden", "true");
+  prev?.focus();
+}
+
+function renderDetail() {
+  const n = byId.get(detailId);
+  if (!n) return;
+
+  const unlocked = isUnlocked(n.id);
+  const met = prereqMet(n);
+  const afford = state.points >= n.cost;
+
+  el.detailIcon.textContent = n.icon;
+  el.detailTier.textContent = `Tier ${n.tier}`;
+  el.detailName.textContent = n.name;
+  el.detailDesc.textContent = n.desc;
+
+  let status;
+  if (unlocked) status = '<span class="pill pill--ok">Unlocked</span>';
+  else if (!met) status = '<span class="pill pill--no">Locked</span>';
+  else if (afford) status = '<span class="pill pill--ok">Ready</span>';
+  else status = '<span class="pill pill--no">Need points</span>';
+  el.detailMeta.innerHTML =
+    `<span class="pill pill--cost">${n.cost} pt${n.cost > 1 ? "s" : ""}</span>` + status;
+
+  const reqHtml = n.requires.length
+    ? n.requires
+        .map((rid) => {
+          const r = byId.get(rid);
+          const ok = isUnlocked(rid);
+          return `<span class="req ${ok ? "req--ok" : "req--no"}">${
+            ok ? "✓" : "✕"
+          } ${r.name}</span>`;
+        })
+        .join("")
+    : '<span class="req req--ok">✓ No prerequisites</span>';
+  el.detailReqs.innerHTML =
+    `<span class="reqs__label">Requires</span><div class="reqs__list">${reqHtml}</div>`;
+
+  el.detailClaim.classList.toggle("detail__claim--done", unlocked);
+  if (unlocked) {
+    el.detailClaim.disabled = true;
+    el.detailClaim.textContent = "Awakened ✓";
+  } else {
+    el.detailClaim.disabled = false;
+    if (!met) el.detailClaim.textContent = "🔒 Prerequisites missing";
+    else if (!afford)
+      el.detailClaim.textContent = `Claim · need ${n.cost - state.points} more`;
+    else el.detailClaim.textContent = `Claim · ${n.cost} pt${n.cost > 1 ? "s" : ""}`;
+  }
+}
+
+function claimDetail() {
+  const n = byId.get(detailId);
+  if (!n || isUnlocked(n.id)) return;
+  if (!canUnlock(n)) {
+    el.detailCard.classList.add("detail__card--shake");
+    setTimeout(() => el.detailCard.classList.remove("detail__card--shake"), 430);
+    sfx.deny();
+    if (!prereqMet(n)) toast("🔒 Locked — awaken its ancestors first", true);
+    else {
+      const short = n.cost - state.points;
+      toast(`⚠️ Need ${short} more skill point${short > 1 ? "s" : ""}`, true);
+    }
+    return;
+  }
+  closeDetail();
+  attemptUnlock(n);
+}
+
+el.detail.addEventListener("click", (e) => {
+  if (e.target.closest("[data-close]")) closeDetail();
+});
+el.detailClaim.addEventListener("click", claimDetail);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && detailId) closeDetail();
+});
 
 /* ---------------- toast ---------------- */
 let toastTimer = null;
