@@ -1,21 +1,34 @@
+/**
+ * The Widow's Web — challenge definitions.
+ *
+ * Only the Overseer (you) can edit these in-app: unlock edit mode with the
+ * passcode below, change a challenge, then hit Export and drop the downloaded
+ * file in as js/data.js to publish it for everyone.
+ *
+ * NOTE: this passcode is checked in the browser, so it deters casual editing,
+ * it is not real security. Change it to something only you know.
+ */
+export const CONFIG = {
+  adminCode: "widow-web",
+  levelXpBase: 100,
+  levelXpStep: 100,
+  levelGoldBase: 100,
+};
+
 export const TREE = {
   title: "The Widow's Web",
-  subtitle: "A haunted territorial.io skill tree",
-  startPoints: 10,
-  levelBase: 100,
-  levelStep: 40,
-  pointsPerLevel: 5,
-  xpPerCost: 25,
+  subtitle: "A haunted territorial.io challenge board",
   nodes: [
     {
       id: "expand",
       name: "Land Grab",
       icon: "🌍",
       tier: 0,
-      cost: 1,
       x: 20,
       y: 10,
       desc: "Grab neutral land early — every acre is future income. The fastest start wins the map.",
+      how: "At the start of a match, send your first troops into empty land and keep 2–3 free tiles between you and any player.",
+      reward: { gold: 100, xp: 60 },
       requires: [],
     },
     {
@@ -23,10 +36,11 @@ export const TREE = {
       name: "Blood Tithe",
       icon: "🩸",
       tier: 0,
-      cost: 1,
       x: 50,
       y: 8,
       desc: "Your territory endlessly produces troops. More land means a faster spawn rate.",
+      how: "Hold a large, connected block of land for 60 seconds without losing a single tile.",
+      reward: { gold: 100, xp: 60 },
       requires: [],
     },
     {
@@ -34,10 +48,11 @@ export const TREE = {
       name: "The Horde",
       icon: "💀",
       tier: 0,
-      cost: 1,
       x: 80,
       y: 10,
       desc: "Mass a surplus before you strike. Never attack from an empty bank.",
+      how: "Bank at least 500 troops before your next attack.",
+      reward: { gold: 100, xp: 60 },
       requires: [],
     },
 
@@ -46,10 +61,11 @@ export const TREE = {
       name: "Eyes in the Dark",
       icon: "👁️",
       tier: 1,
-      cost: 1,
       x: 22,
       y: 27,
       desc: "Read the map: who is weak, who borders you, and where the boats are landing.",
+      how: "Open the minimap and count how many players border you before you attack anyone.",
+      reward: { gold: 150, xp: 80 },
       requires: ["expand"],
     },
     {
@@ -57,10 +73,11 @@ export const TREE = {
       name: "Bone Wall",
       icon: "🛡️",
       tier: 1,
-      cost: 1,
       x: 50,
       y: 26,
       desc: "Hold chokepoints and borders. A defended flank frees your main force to attack.",
+      how: "Reinforce a one-tile chokepoint until it is your strongest border.",
+      reward: { gold: 150, xp: 80 },
       requires: ["growth", "army"],
     },
     {
@@ -68,10 +85,11 @@ export const TREE = {
       name: "Assault",
       icon: "⚔️",
       tier: 1,
-      cost: 1,
       x: 78,
       y: 27,
       desc: "Throw troops at the enemy. Use full-strength attacks to actually take the tile.",
+      how: "Capture a single enemy tile using a full-strength attack (attack bar full).",
+      reward: { gold: 150, xp: 80 },
       requires: ["army"],
     },
 
@@ -80,10 +98,11 @@ export const TREE = {
       name: "Ghost Fleet",
       icon: "⛵",
       tier: 2,
-      cost: 2,
       x: 18,
       y: 45,
       desc: "Boats let you bypass borders and strike players across the water.",
+      how: "Launch a boat to an island or across water and capture land there.",
+      reward: { gold: 200, xp: 100 },
       requires: ["expand", "scout"],
     },
     {
@@ -91,10 +110,11 @@ export const TREE = {
       name: "Pact of the Damned",
       icon: "🤝",
       tier: 2,
-      cost: 2,
       x: 39,
       y: 47,
       desc: "Ally with neighbours so you both survive the early rush — then out-grow them.",
+      how: "Send an alliance request and have it accepted by another player.",
+      reward: { gold: 200, xp: 100 },
       requires: ["growth", "scout"],
     },
     {
@@ -102,10 +122,11 @@ export const TREE = {
       name: "Butcher's Focus",
       icon: "🎯",
       tier: 2,
-      cost: 2,
       x: 72,
       y: 46,
       desc: "Concentrate every attack on one target. Splitting your army loses games.",
+      how: "Take three tiles in a row from the same player.",
+      reward: { gold: 200, xp: 100 },
       requires: ["assault", "fortify"],
     },
 
@@ -114,10 +135,11 @@ export const TREE = {
       name: "Blitzkrieg",
       icon: "💥",
       tier: 3,
-      cost: 2,
       x: 28,
       y: 64,
       desc: "Snowball hard: spend everything to expand faster than passive income allows.",
+      how: "Expand by more than 5% of the map within 30 seconds.",
+      reward: { gold: 300, xp: 120 },
       requires: ["fleet", "focus"],
     },
     {
@@ -125,10 +147,11 @@ export const TREE = {
       name: "Dread Fleet",
       icon: "🚢",
       tier: 3,
-      cost: 2,
       x: 50,
       y: 63,
       desc: "Warships rule the coast and shred enemy boats before they can land.",
+      how: "Use a warship to sink two enemy boats.",
+      reward: { gold: 300, xp: 120 },
       requires: ["fleet", "alliance"],
     },
     {
@@ -136,10 +159,11 @@ export const TREE = {
       name: "Curse Bombs",
       icon: "☄️",
       tier: 3,
-      cost: 2,
       x: 76,
       y: 64,
       desc: "Punish the runaway leader and reset the board when one empire gets too big.",
+      how: "Drop a nuke on the player who currently holds the most land.",
+      reward: { gold: 300, xp: 120 },
       requires: ["focus", "alliance"],
     },
 
@@ -148,10 +172,11 @@ export const TREE = {
       name: "Territorial Overlord",
       icon: "👑",
       tier: 4,
-      cost: 3,
       x: 50,
       y: 82,
       desc: "Master expansion, economy and warfare. Own the map before the timer ends.",
+      how: "Finish a match in first place.",
+      reward: { gold: 500, xp: 200 },
       requires: ["blitz", "warships", "nukes"],
     },
   ],

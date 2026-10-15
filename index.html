@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#0a0612" />
     <meta
       name="description"
-      content="The Widow's Web — a haunted, animated territorial.io conquest skill tree."
+      content="The Widow's Web — a haunted territorial.io challenge board. Complete challenges to earn gold."
     />
-    <title>🕷️ The Widow's Web — Haunted territorial.io Skill Tree</title>
+    <title>🕷️ The Widow's Web — Haunted territorial.io Challenge Board</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -33,14 +33,14 @@
         <span class="brand-icon">🕷️</span>
         <div>
           <h1 class="hud__title">The Widow's Web</h1>
-          <p class="hud__sub" id="subtitle">A haunted territorial.io skill tree</p>
+          <p class="hud__sub" id="subtitle">A haunted territorial.io challenge board</p>
         </div>
       </div>
 
       <div class="hud__stats">
-        <div class="stat" title="Unspent skill points">
-          <span class="stat__label">Skill Points</span>
-          <span class="stat__value" id="points">0</span>
+        <div class="stat" title="Gold earned">
+          <span class="stat__label">Gold</span>
+          <span class="stat__value stat__value--gold" id="gold">0</span>
         </div>
         <div class="stat stat--xp">
           <span class="stat__label"
@@ -48,13 +48,23 @@
           >
           <div class="xpbar"><i id="xpFill"></i></div>
         </div>
-        <div class="stat" title="Skills unlocked">
-          <span class="stat__label">Unlocked</span>
-          <span class="stat__value" id="unlockedCount">0 / 0</span>
+        <div class="stat" title="Challenges completed">
+          <span class="stat__label">Completed</span>
+          <span class="stat__value" id="completedCount">0 / 0</span>
         </div>
       </div>
 
       <div class="hud__actions">
+        <button id="adminBtn" class="icon-btn" title="Overseer edit mode" aria-label="Overseer edit mode">
+          ⚙️
+        </button>
+        <span id="adminTools" class="admin-tools" hidden>
+          <button id="exportBtn" class="ghost-btn" title="Download updated data.js">Export</button>
+          <label class="ghost-btn file-btn" title="Import a saved data.js">
+            Import<input id="importInput" type="file" accept=".js,.json" hidden />
+          </label>
+          <button id="exitAdminBtn" class="ghost-btn" title="Leave edit mode">Exit edit</button>
+        </span>
         <button id="soundBtn" class="icon-btn" title="Toggle sound" aria-label="Toggle sound">
           🔊
         </button>
@@ -83,17 +93,87 @@
         </button>
         <div class="detail__icon" id="detailIcon">🌍</div>
         <div class="detail__tier" id="detailTier">Tier 0</div>
-        <h2 class="detail__name" id="detailName">Skill</h2>
+        <h2 class="detail__name" id="detailName">Challenge</h2>
         <p class="detail__desc" id="detailDesc"></p>
-        <div class="detail__meta" id="detailMeta"></div>
+        <div class="detail__section">
+          <span class="detail__label">How to complete</span>
+          <p class="detail__how" id="detailHow"></p>
+        </div>
+        <div class="detail__rewards" id="detailRewards"></div>
         <div class="detail__reqs" id="detailReqs"></div>
-        <button class="detail__claim" id="detailClaim" type="button">Claim</button>
+        <button class="detail__claim" id="detailClaim" type="button">Complete</button>
+      </div>
+    </div>
+
+    <div id="editor" class="detail" aria-hidden="true">
+      <div class="detail__backdrop" data-editor-close></div>
+      <div
+        class="detail__card detail__card--edit"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="editHeading"
+      >
+        <button class="detail__close" type="button" data-editor-close aria-label="Close editor">
+          ✕
+        </button>
+        <h2 class="detail__name detail__name--sm" id="editHeading">Edit challenge</h2>
+
+        <label class="field">
+          <span class="field__label">Logo <em>emoji or image URL</em></span>
+          <div class="field__icon-row">
+            <input id="editIcon" type="text" maxlength="400" placeholder="🌍 or https://…" />
+            <span class="field__preview" id="editIconPreview">🌍</span>
+          </div>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Name</span>
+          <input id="editName" type="text" maxlength="48" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">Description</span>
+          <textarea id="editDesc" rows="2"></textarea>
+        </label>
+
+        <label class="field">
+          <span class="field__label">How to complete</span>
+          <textarea id="editHow" rows="3"></textarea>
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span class="field__label">💰 Gold reward</span>
+            <input id="editGold" type="number" min="0" step="1" />
+          </label>
+          <label class="field">
+            <span class="field__label">✨ XP reward</span>
+            <input id="editXp" type="number" min="0" step="1" />
+          </label>
+        </div>
+
+        <div class="edit-actions">
+          <button id="editRevert" class="ghost-btn" type="button">Revert</button>
+          <button id="editSave" class="detail__claim" type="button">Save challenge</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="gate" class="detail" aria-hidden="true">
+      <div class="detail__backdrop" data-gate-close></div>
+      <div class="detail__card" role="dialog" aria-modal="true" aria-labelledby="gateHeading">
+        <button class="detail__close" type="button" data-gate-close aria-label="Close">✕</button>
+        <div class="detail__icon">🔐</div>
+        <h2 class="detail__name" id="gateHeading">Overseer key</h2>
+        <p class="detail__desc">Enter the passcode to edit challenges.</p>
+        <input id="gateInput" type="password" class="gate__input" placeholder="Passcode" />
+        <button id="gateSubmit" class="detail__claim" type="button">Unlock edit mode</button>
       </div>
     </div>
 
     <footer class="foot">
       <span
-        >Click a node for details · Claim it from the panel · Progress saves
+        >Click a challenge for details · Complete it to earn gold · Progress saves
         automatically</span
       >
       <span class="foot__ghost">🕸️</span>
@@ -109,7 +189,7 @@
       <div class="levelup__card">
         <div class="levelup__eyebrow">The graveyard trembles</div>
         <div class="levelup__title">LEVEL <span id="luLevel">2</span></div>
-        <div class="levelup__reward">🕸️ REWARD · +<span id="luPoints">5</span> SKILL POINTS</div>
+        <div class="levelup__reward">💰 LEVEL BOUNTY · +<span id="luGold">100</span> GOLD</div>
       </div>
     </div>
 

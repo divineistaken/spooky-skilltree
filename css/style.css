@@ -244,6 +244,11 @@ body {
   transition: transform 0.2s ease;
 }
 
+.stat__value--gold {
+  color: var(--gold);
+  text-shadow: 0 0 14px rgba(255, 211, 77, 0.7);
+}
+
 .stat--xp {
   min-width: 190px;
   justify-content: center;
@@ -428,24 +433,32 @@ body {
   pointer-events: none;
 }
 
-.node__cost {
+.node__reward {
   position: absolute;
-  right: -6px;
-  top: -6px;
+  right: -10px;
+  top: -8px;
   min-width: 22px;
   height: 22px;
-  padding: 0 5px;
+  padding: 0 6px;
   border-radius: 99px;
   display: grid;
   place-items: center;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  color: #1a0b00;
-  background: linear-gradient(180deg, var(--orange-hot), var(--orange));
-  box-shadow: 0 0 12px rgba(255, 122, 24, 0.8);
+  color: #2a1a00;
+  background: linear-gradient(180deg, var(--gold), var(--orange));
+  box-shadow: 0 0 12px rgba(255, 211, 77, 0.8);
   opacity: 0;
   transform: scale(0.6);
   transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.logo-img {
+  width: 1.1em;
+  height: 1.1em;
+  object-fit: contain;
+  border-radius: 6px;
+  vertical-align: middle;
 }
 
 .node__name {
@@ -522,7 +535,7 @@ body {
   filter: grayscale(0) brightness(1);
 }
 
-.node--ready .node__cost {
+.node--ready .node__reward {
   opacity: 1;
   transform: scale(1);
 }
@@ -555,6 +568,23 @@ body {
 
 .node--unlocked .node__icon {
   filter: grayscale(0) brightness(1.15) drop-shadow(0 0 8px rgba(255, 176, 32, 0.7));
+}
+
+.node--unlocked::after {
+  content: "✓";
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #04240a;
+  background: linear-gradient(180deg, var(--toxic), #3aa832);
+  box-shadow: 0 0 10px rgba(125, 255, 107, 0.8);
 }
 
 .node--unlocked:hover {
@@ -701,6 +731,66 @@ body {
   background: linear-gradient(180deg, var(--orange-hot), var(--orange));
   border: none;
   font-weight: 800;
+}
+
+.pill--gold {
+  color: #2a1a00;
+  background: linear-gradient(180deg, var(--gold), var(--orange));
+  border: none;
+  font-weight: 800;
+}
+
+/* ---------- Detail sections ---------- */
+.detail__section {
+  margin: 0 0 14px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  text-align: left;
+}
+
+.detail__label {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 6px;
+}
+
+.detail__how {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.detail__rewards {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.reward {
+  padding: 7px 16px;
+  border-radius: 99px;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.reward--gold {
+  color: #2a1a00;
+  background: linear-gradient(180deg, var(--gold), var(--orange));
+  box-shadow: 0 0 20px rgba(255, 211, 77, 0.5);
+}
+
+.reward--xp {
+  color: #04240a;
+  background: linear-gradient(180deg, var(--toxic), #3aa832);
+  box-shadow: 0 0 20px rgba(125, 255, 107, 0.4);
 }
 
 /* ---------- Detail panel ---------- */
@@ -937,6 +1027,150 @@ body {
   box-shadow: 0 0 26px rgba(125, 255, 107, 0.5);
 }
 
+/* ---------- Editor / gate ---------- */
+.detail__card--edit {
+  width: min(520px, 94vw);
+  text-align: left;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.detail__name--sm {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  text-align: center;
+  margin-top: 4px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.field__label {
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.field__label em {
+  font-style: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.7;
+}
+
+.field input,
+.field textarea,
+.gate__input {
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 10px;
+  padding: 10px 12px;
+  width: 100%;
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.gate__input:focus {
+  outline: none;
+  border-color: var(--orange);
+  box-shadow: 0 0 0 2px rgba(255, 122, 24, 0.2);
+}
+
+.field__icon-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.field__preview {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  overflow: hidden;
+}
+
+.field__preview .logo-img {
+  width: 34px;
+  height: 34px;
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-row .field {
+  flex: 1;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.edit-actions .detail__claim {
+  margin-top: 0;
+  flex: 1;
+}
+
+.edit-actions .ghost-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.gate__input {
+  text-align: center;
+  letter-spacing: 2px;
+  margin: 6px 0 16px;
+}
+
+/* ---------- Admin ---------- */
+.admin-tools {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-tools[hidden] {
+  display: none;
+}
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.icon-btn--active {
+  border-color: var(--orange);
+  color: var(--orange-hot);
+  box-shadow:
+    0 0 0 2px rgba(255, 122, 24, 0.25),
+    0 0 18px rgba(255, 122, 24, 0.45);
+}
+
+body.admin .stage {
+  outline: 2px dashed rgba(255, 122, 24, 0.28);
+  outline-offset: 10px;
+  border-radius: 18px;
+}
+
 /* ---------- Toast ---------- */
 .toast {
   position: fixed;
@@ -1021,6 +1255,13 @@ body {
 
 .float-reward--points {
   color: var(--orange-hot);
+}
+
+.float-reward--gold {
+  color: var(--gold);
+  text-shadow:
+    0 0 10px rgba(0, 0, 0, 0.9),
+    0 0 18px rgba(255, 211, 77, 0.9);
 }
 
 /* ---------- Level up overlay ---------- */
@@ -1228,7 +1469,7 @@ body {
     height: 68vh;
     min-height: 520px;
   }
-  .node__cost {
+  .node__reward {
     display: none;
   }
   .node__name {

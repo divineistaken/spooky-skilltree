@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "The Widow's Web — a haunted, animated territorial.io conquest skill tree.",
+  "description": "The Widow's Web — a haunted, editable territorial.io challenge board with a gold economy.",
   "scripts": {
     "start": "npx --yes serve .",
     "check": "node --check js/data.js && node --check js/audio.js && node --check js/background.js && node --check js/spiders.js && node --check js/app.js"
